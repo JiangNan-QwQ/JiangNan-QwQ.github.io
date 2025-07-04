@@ -5,6 +5,38 @@
         // 显示加载界面
         const loader = document.getElementById('loader');
         
+        // 设置15秒超时定时器
+        const timeout = setTimeout(() => {
+            console.warn('资源加载超时，强制显示页面');
+            forceShowPage();
+        }, 15000); // 15秒超时
+        
+        // 强制显示页面的函数
+        const forceShowPage = () => {
+            clearTimeout(timeout);
+            loader.classList.add('hidden');
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+            
+            // 初始化基本功能
+            ProgressBar.init();
+            Theme.init();
+            DigitalClock.init();
+            
+            // 显示加载超时提示
+            const timeoutMessage = document.createElement('div');
+            timeoutMessage.className = 'load-timeout-message';
+            timeoutMessage.innerHTML = `
+                <div class="timeout-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>部分资源加载缓慢，页面可能不完整</p>
+                    <button class="btn" onclick="this.parentNode.parentNode.remove()">我知道了</button>
+                </div>
+            `;
+            document.body.appendChild(timeoutMessage);
+        };
+        
         // 等待所有关键资源加载完成
         Promise.all([
             // 等待字体加载
@@ -66,6 +98,9 @@
                 }
             })
         ]).then(() => {
+            // 清除超时定时器
+            clearTimeout(timeout);
+            
             // 所有资源加载完成后，隐藏加载界面
             loader.classList.add('hidden');
             
@@ -85,16 +120,8 @@
             }, 500);
         }).catch((error) => {
             console.error('资源加载出错:', error);
-            // 即使出错也继续显示页面
-            loader.classList.add('hidden');
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 500);
-            
-            // 初始化基本功能
-            ProgressBar.init();
-            Theme.init();
-            DigitalClock.init();
+            clearTimeout(timeout);
+            forceShowPage();
         });
     });
     
@@ -222,20 +249,28 @@
         },
         
         fetchHitokoto() {
-            fetch('https://v1.hitokoto.cn')
-                .then(response => {
-                    if (!response.ok) throw new Error('网络响应不正常');
-                    return response.json();
-                })
-                .then(data => {
-                    this.hitokotoText.textContent = `「${data.hitokoto}」`;
-                    if (data.from) {
-                        this.hitokotoText.textContent += ` —— ${data.from}`;
-                    }
-                })
-                .catch(() => {
-                    this.hitokotoText.textContent = '「世界は美しくなんかない、そしてそれ故に美しい」';
-                });
+            // 设置5秒超时
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('请求超时')), 5000)
+            );
+            
+            Promise.race([
+                fetch('https://v1.hitokoto.cn'),
+                timeoutPromise
+            ])
+            .then(response => {
+                if (!response.ok) throw new Error('网络响应不正常');
+                return response.json();
+            })
+            .then(data => {
+                this.hitokotoText.textContent = `「${data.hitokoto}」`;
+                if (data.from) {
+                    this.hitokotoText.textContent += ` —— ${data.from}`;
+                }
+            })
+            .catch(() => {
+                this.hitokotoText.textContent = '「世界は美しくなんかない、そしてそれ故に美しい」';
+            });
         }
     };
     
