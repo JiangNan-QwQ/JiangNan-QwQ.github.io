@@ -11,31 +11,37 @@
             forceShowPage();
         }, 15000); // 15秒超时
         
-        // 强制显示页面的函数
-        const forceShowPage = () => {
-            clearTimeout(timeout);
-            loader.classList.add('hidden');
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 500);
-            
-            // 初始化基本功能
-            ProgressBar.init();
-            Theme.init();
-            DigitalClock.init();
-            
-            // 显示加载超时提示
-            const timeoutMessage = document.createElement('div');
-            timeoutMessage.className = 'load-timeout-message';
-            timeoutMessage.innerHTML = `
-                <div class="timeout-content">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>部分资源加载缓慢，页面可能不完整</p>
-                    <button class="btn" onclick="this.parentNode.parentNode.remove()">我知道了</button>
-                </div>
-            `;
-            document.body.appendChild(timeoutMessage);
-        };
+const forceShowPage = () => {
+    clearTimeout(timeout);
+    loader.classList.add('hidden');
+    setTimeout(() => {
+        loader.style.display = 'none';
+    }, 500);
+    
+    // 初始化基本功能
+    ProgressBar.init();
+    Theme.init();
+    DigitalClock.init();
+    
+    // 显示加载超时提示
+    const timeoutMessage = document.createElement('div');
+    timeoutMessage.className = 'load-timeout-message';
+    timeoutMessage.innerHTML = `
+        <div class="timeout-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>部分资源加载缓慢，页面可能不完整</p>
+            <button class="btn" onclick="this.parentNode.parentNode.remove()">我知道了</button>
+        </div>
+    `;
+    document.body.appendChild(timeoutMessage);
+    
+    // 5秒后自动移除提示
+    setTimeout(() => {
+        if (timeoutMessage.parentNode) {
+            timeoutMessage.remove();
+        }
+    }, 5000);
+};
         
         // 等待所有关键资源加载完成
         Promise.all([
