@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0984e3">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="description" content="Aether_Craft - 下载帮助与使用指南">
+    <meta name="keywords" content="Minecraft,开服脚本,下载帮助,使用指南">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>Aether_Craft - 下载帮助</title>
+    
+    <!-- 预加载 -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+    <link rel="preload" href="ge2.mp3" as="fetch" type="audio/mpeg">
+
+    
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- 主样式 -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 进度条 -->
+    <div class="progress-bar"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-cube"></i>
+                <span>Aether_Craft</span>
+            </a>
+            
+            <div class="nav-actions">
+                <span id="digital-clock"></span>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 下载帮助主内容 -->
+    <main class="download-help">
+        <section class="download-intro">
+            <div class="container">
+                <h1>Aether_Craft 下载与安装指南</h1>
+                <p class="subtitle">按照以下步骤轻松安装和使用Aether_Craft开服脚本</p>
+                
+                <div class="download-options">
+                    <div class="download-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>手机端安装</h3>
+                        <p>适用于Termux/ZeroTermux环境</p>
+                        <a href="#mobile-install" class="btn">查看教程</a>
+                    </div>
+                    
+                    <div class="download-card">
+                        <i class="fas fa-desktop"></i>
+                        <h3>电脑端安装</h3>
+                        <p>适用于Linux环境</p>
+                        <a href="#pc-install" class="btn">查看教程</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 手机端安装指南 -->
+        <section id="mobile-install" class="guide-section">
+            <div class="container">
+                <h2><i class="fas fa-mobile-alt"></i> 手机端安装指南</h2>
+                
+                <div class="guide-step">
+                    <div class="step-content">
+                        <h3>1. 准备</h3>
+                        <p>首先需要一个脑子，一只手，一部手机，ZeroTermux/Termux软件(百度搜)</p>
+                   
+                    </div>
+                </div>
+                
+                <div class="guide-step reverse">
+                    <div class="step-content">
+                        <h3>2. 基本环境配置</h3>
+                        <p>安装完成后，打开ZeroTermux并粘贴以下命令回车以更新系统(国内)：</p>
+                        <div class="code-block" id="code-block-1">
+                            <pre><code class="language-bash">bash -c '
+# 定义所有可用的国内镜像组
+MIRRORS=(
+    "https://mirrors.hust.edu.cn/termux/apt/termux-main"
+    "https://mirrors.nju.edu.cn/termux/apt/termux-main"
+    "https://mirrors.cernet.edu.cn/termux/apt/termux-main"
+    "https://mirror.nyist.edu.cn/termux/apt/termux-main"
+    "https://mirrors.sau.edu.cn/termux/apt/termux-main"
+    "https://mirrors.cqupt.edu.cn/termux/termux-main"
+    "https://mirror.iscas.ac.cn/termux/apt/termux-main"
+    "https://mirrors.pku.edu.cn/termux/termux-main/"
+    "https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main"
+    "https://mirrors.bfsu.edu.cn/termux/apt/termux-main"
+    "https://mirrors.zju.edu.cn/termux/apt/termux-main"
+    "https://mirrors.sustech.edu.cn/termux/apt/termux-main"
+    "https://mirror.sjtu.edu.cn/termux/termux-main/"
+    "https://mirrors.aliyun.com/termux/termux-main"
+    "https://mirrors.ustc.edu.cn/termux/termux-main"
+)
+
+# 备份原来的sources.list文件
+if [ -f "$PREFIX/etc/apt/sources.list" ]; then
+    cp "$PREFIX/etc/apt/sources.list" "$PREFIX/etc/apt/sources.list.bak"
+fi
+
+# 生成新的sources.list文件
+echo "# Termux 国内镜像组配置" > "$PREFIX/etc/apt/sources.list"
+echo "# 生成时间: $(date)" >> "$PREFIX/etc/apt/sources.list"
+echo "" >> "$PREFIX/etc/apt/sources.list"
+
+# 添加主仓库(main)镜像
+echo "# 主仓库镜像" >> "$PREFIX/etc/apt/sources.list"
+for mirror in "${MIRRORS[@]}"; do
+    BASE_URL=${mirror%/*}
+    echo "deb ${BASE_URL}/ stable main" >> "$PREFIX/etc/apt/sources.list"
+done
+
+# 添加游戏仓库(games)镜像
+echo "" >> "$PREFIX/etc/apt/sources.list"
+echo "# 游戏仓库镜像" >> "$PREFIX/etc/apt/sources.list"
+for mirror in "${MIRRORS[@]}"; do
+    BASE_URL=${mirror%/*}
+    echo "deb ${BASE_URL}/ games stable" >> "$PREFIX/etc/apt/sources.list"
+done
+
+echo "Termux 软件源已成功更换为国内镜像组，包含以下镜像:"
+for mirror in "${MIRRORS[@]}"; do
+    BASE_URL=${mirror%/*}
+    echo "  - ${BASE_URL}"
+done
+echo ""
+pkg up
+echo "更换成功"
+'
+</code></pre>
+                            <button class="copy-btn" data-clipboard-target="#code-block-1 code"><i class="fas fa-copy"></i> 复制</button>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="guide-step">
+                    <div class="step-content">
+                        <h3>3. 运行Aether_Craft脚本</h3>
+                        <p>使用curl执行：</p>
+                        <div class="tabs">
+                            <div class="tab-buttons">
+                                <button class="tab-btn active" data-tab="cn">国内</button>
+                                <button class="tab-btn" data-tab="us">国外</button>
+                            </div>
+                            <div class="tab-content active" data-tab="cn">
+                                <div class="code-block" id="code-block-2">
+                                    <pre><code class="language-bash">pkg install -y curl ; bash -c "$(curl -L https://gitee.com/jiangnan-qwq/AetherCraft_cn/raw/main/main.sh)"</code></pre>
+                                    <button class="copy-btn" data-clipboard-target="#code-block-2 code"><i class="fas fa-copy"></i> 复制</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-tab="us">
+                                <div class="code-block" id="code-block-3">
+                                    <pre><code class="language-bash">pkg install -y curl ; bash -c "$(curl -L https://raw.githubusercontent.com/JiangNan-QwQ/AetherCraft/main/main.sh)"</code></pre>
+                                    <button class="copy-btn" data-clipboard-target="#code-block-3 code"><i class="fas fa-copy"></i> 复制</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="note">注意选择速度快的站。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 电脑端安装指南 -->
+        <section id="pc-install" class="guide-section">
+            <div class="container">
+                <h2><i class="fas fa-desktop"></i> 电脑端安装指南</h2>
+                
+                <div class="guide-step">
+                    <div class="step-content">
+                        <h3>1. 系统要求</h3>
+                        <p>Aether_Craft支持以下操作系统：</p>
+                        <ul>
+                            <li>Linux发行版（Ubuntu/Debian及基于Debian的系统）</li>
+                        </ul>
+                        <p>建议系统配置：</p>
+                        <ul>
+                            <li>至少2GB内存</li>
+                            <li>10GB可用磁盘空间</li>
+                            <li>Java 21</li>
+                        </ul>
+                    </div>
+                    
+                </div>
+                
+                <div class="guide-step reverse">
+                    <div class="step-content">
+                        <h3>2. 安装依赖</h3>
+                        <p>根据您的所在地，换源(国外跳过)，如没有您的系统，请自行寻找换源教程(限apt包管理器)：</p>
+                        <div class="tabs">
+                            <div class="tab-buttons">
+                                <button class="tab-btn active" data-tab="Ubuntu">Ubuntu</button>
+                                <button class="tab-btn" data-tab="kali">kali</button>
+                            </div>
+                            <div class="tab-content active" data-tab="Ubuntu">
+                                <div class="code-block" id="code-block-4">
+                                    <pre><code class="language-bash">#无代码替换方案，请上网自行搜索</code></pre>
+                                    <button class="copy-btn" data-clipboard-target="#code-block-4 code"><i class="fas fa-copy"></i> 复制</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-tab="kali">
+                                <div class="code-block" id="code-block-5">
+                                    <pre><code class="language-bash">sudo sed -i "s@http://http.kali.org/kali@https://mirrors.tuna.tsinghua.edu.cn/kali@g" /etc/apt/sources.list</code></pre>
+                                    <button class="copy-btn" data-clipboard-target="#code-block-5 code"><i class="fas fa-copy"></i> 复制</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="step-content">
+                        <h3>3. 运行Aether_Craft脚本</h3>
+                        <p>使用curl执行：</p>
+                        <div class="tabs">
+                            <div class="tab-buttons">
+                                <button class="tab-btn active" data-tab="cn">国内</button>
+                                <button class="tab-btn" data-tab="us">国外</button>
+                            </div>
+                            <div class="tab-content active" data-tab="cn">
+                                <div class="code-block" id="code-block-6">
+                                    <pre><code class="language-bash">apt install -y curl ; bash -c "$(curl -L https://gitee.com/jiangnan-qwq/AetherCraft_cn/raw/main/main.sh)"</code></pre>
+                                    <button class="copy-btn" data-clipboard-target="#code-block-6 code"><i class="fas fa-copy"></i> 复制</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-tab="us">
+                                <div class="code-block" id="code-block-7">
+                                    <pre><code class="language-bash">apt install -y curl ; bash -c "$(curl -L https://raw.githubusercontent.com/JiangNan-QwQ/AetherCraft/main/main.sh)"</code></pre>
+                                    <button class="copy-btn" data-clipboard-target="#code-block-7 code"><i class="fas fa-copy"></i> 复制</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="note">注意选择速度快的站。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 常见问题 -->
+        <section class="faq-section">
+            <div class="container">
+                <h2><i class="fas fa-question-circle"></i> 常见问题解答</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>怎么管理服务器？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                    <p>这里讲的是运行界面的管理，更多管理功能请见脚本主界面。
+                        <p>停止服务器：</p>
+                        <div class="code-block" id="code-block-8">
+                            <pre><code class="language-bash">stop</code></pre>
+                            <button class="copy-btn" data-clipboard-target="#code-block-8 code"><i class="fas fa-copy"></i> 复制</button>
+                        </div>
+                        <p>查看日志：</p>
+                        <div class="code-block" id="code-block-9">
+                            <pre><code class="language-bash">tail -f logs/latest.log</code></pre>
+                            <button class="copy-btn" data-clipboard-target="#code-block-9 code"><i class="fas fa-copy"></i> 复制</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>如何更新Aether_Craft到最新版本？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>无需更新，每次运行都会获取最新版本！</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>服务器启动后无法连接怎么办？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>请检查以下事项：</p>
+                        <ol>
+                            <li>确保服务器已完全启动（等待"Done"消息）</li>
+                            <li>检查防火墙设置是否允许服务器端口</li>
+                            <li>确认<code>server.properties</code>中的<code>online-mode</code>设置</li>
+                            <li>如果是局域网连接，确保设备在同一网络，并确认连接的IP地址</li>
+                            <li>如果是外部连接，请配置好内网穿透
+                        </ol>
+                        <p>您还可以查看日志文件获取更多信息：</p>
+                        <div class="code-block" id="code-block-10">
+                            <pre><code class="language-bash">cat logs/latest.log | grep -i error</code></pre>
+                            <button class="copy-btn" data-clipboard-target="#code-block-10 code"><i class="fas fa-copy"></i> 复制</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>如何备份我的服务器？</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Aether_Craft提供了备份功能，详见主界面。</p>
+                    </div>
+                </div>
+                
+ 
+            </div>
+        </section>
+        
+        <!-- 联系支持 -->
+        <section class="support-section">
+            <div class="container">
+                <h2><i class="fas fa-life-ring"></i> 需要更多帮助？</h2>
+                <p>如果您遇到任何问题或需要进一步的帮助，请随时联系作者：</p>
+                
+                <div class="support-options">
+                    <div class="support-card">
+                        <i class="fab fa-qq"></i>
+                        <h3>QQ支持</h3>
+                        <p>作者QQ：1706491377</p>
+                        <a href="https://qm.qq.com/q/lyC8eXZNmw" class="btn">添加好友</a>
+                    </div>
+                    
+                    <div class="support-card">
+                        <i class="fab fa-bilibili"></i>
+                        <h3>B站</h3>
+                        <p>访问B站主页</p>
+                        <a href="https://b23.tv/IR4nftM" class="btn">前往B站</a>
+                    </div>
+                    
+                    <div class="support-card">
+                        <i class="fas fa-envelope"></i>
+                        <h3>电子邮件</h3>
+                        <p>发送邮件至：1706491377@qq.com</p>
+                        <a href="mailto:1706491377@qq.com" class="btn">发送邮件</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- 页脚 -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>关于Aether_Craft</h3>
+                <p>Aether_Craft致力于为Minecraft玩家提供简单易用的开服解决方案，让每个人都能轻松搭建自己的游戏服务器。</p>
+                <div class="social-links">
+                    <a href="https://b23.tv/IR4nftM" aria-label="Bilibili"><i class="fab fa-bilibili"></i></a>
+                    <a href="https://qm.qq.com/q/lyC8eXZNmw" aria-label="QQ"><i class="fab fa-qq"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-column">
+                <h3>快速链接</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="download.html">下载帮助</a></li>
+                    <li><a href="#mobile-install">手机安装</a></li>
+                    <li><a href="#pc-install">电脑安装</a></li>
+                </ul>
+            </div>
+            
+
+        </div>
+        
+        <div class="copyright">
+            <p>2024-2025 Aether_Craft  | 由B站JE开发维护</p>
+        </div>
+    </footer>
+
+   
+
+    <!-- 脚本 -->
+    <script src="js.js"></script>
+    <!-- 代码高亮 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <!-- 剪贴板 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+    <script>
+        // 初始化代码高亮
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.highlightAll();
+            
+            // 初始化剪贴板
+            new ClipboardJS('.copy-btn');
+            
+            // 为复制按钮添加反馈
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                    }, 2000);
+                });
+            });
+            
+            // 标签页切换
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.getAttribute('data-tab');
+                    const tabContainer = btn.closest('.tabs');
+                    
+                    // 更新按钮状态
+                    tabContainer.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    
+                    // 更新内容
+                    tabContainer.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    tabContainer.querySelector(`.tab-content[data-tab="${tabId}"]`).classList.add('active');
+                });
+            });
+            
+            // FAQ切换
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', () => {
+                    const item = question.parentElement;
+                    item.classList.toggle('active');
+                    
+                    // 关闭其他FAQ
+                    if (item.classList.contains('active')) {
+                        document.querySelectorAll('.faq-item').forEach(otherItem => {
+                            if (otherItem !== item) {
+                                otherItem.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
