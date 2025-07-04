@@ -1,136 +1,168 @@
 // 使用模块化方式组织代码
 (function() {
-    // 初始化函数
-    document.addEventListener('DOMContentLoaded', () => {
-        // 显示加载界面
-        const loader = document.getElementById('loader');
+    // 加载状态管理
+    const Loader = {
+        init() {
+            this.loader = document.querySelector('.loader');
+            this.maxLoadTime = 10000; // 10秒超时
+            this.loadStartTime = Date.now();
+            this.resourcesLoaded = false;
+            this.fontsLoaded = false;
+            
+            if (!this.loader) return;
+            
+            // 检查字体是否加载完成
+            this.checkFontsLoading();
+            // 检查图片和图标是否加载完成
+            this.checkResourcesLoading();
+            // 设置超时
+            this.setTimeout();
+        },
         
-        // 设置15秒超时定时器
-        const timeout = setTimeout(() => {
-            console.warn('资源加载超时，强制显示页面');
-            forceShowPage();
-        }, 15000); // 15秒超时
+        checkFontsLoading() {
+            // 使用 FontFace API 检查字体加载状态
+            Promise.all([
+                document.fonts.load('1rem var(--font-sans)'),
+                document.fonts.load('1rem var(--font-mono)')
+            ]).then(() => {
+                this.fontsLoaded = true;
+                this.checkAllLoaded();
+            }).catch(() => {
+                // 即使字体加载失败也继续
+                this.fontsLoaded = true;
+                this.checkAllLoaded();
+            });
+        },
         
-const forceShowPage = () => {
-    clearTimeout(timeout);
-    loader.classList.add('hidden');
-    setTimeout(() => {
-        loader.style.display = 'none';
-    }, 500);
-    
-    // 初始化基本功能
-    ProgressBar.init();
-    Theme.init();
-    DigitalClock.init();
-    
-    // 显示加载超时提示
-    const timeoutMessage = document.createElement('div');
-    timeoutMessage.className = 'load-timeout-message';
-    timeoutMessage.innerHTML = `
-        <div class="timeout-content">
-            <i class="fas fa-exclamation-triangle"></i>
-            <p>部分资源加载缓慢，页面可能不完整</p>
-            <button class="btn" onclick="this.parentNode.parentNode.remove()">我知道了</button>
-        </div>
-    `;
-    document.body.appendChild(timeoutMessage);
-    
-    // 5秒后自动移除提示
-    setTimeout(() => {
-        if (timeoutMessage.parentNode) {
-            timeoutMessage.remove();
-        }
-    }, 5000);
-};
-        
-        // 等待所有关键资源加载完成
-        Promise.all([
-            // 等待字体加载
-            document.fonts.ready,
+        checkResourcesLoading() {
+            // 检查所有图片、图标等资源
+            const images = document.querySelectorAll('img');
+            const icons = document.querySelectorAll('i');
+            const canvas = document.getElementById('particles');
             
-            // 等待图标库加载
-            new Promise((resolve) => {
-                const fontAwesomeLink = document.querySelector('link[href*="font-awesome"]');
-                if (fontAwesomeLink) {
-                    if (fontAwesomeLink.sheet) {
-                        resolve(); // 如果已经加载完成
-                    } else {
-                        fontAwesomeLink.onload = resolve;
-                    }
+            let totalResources = images.length;
+            let loadedResources = 0;
+            
+            // 如果没有图片资源，直接标记为加载完成
+            if (totalResources === 0 && !canvas) {
+                this.resourcesLoaded = true;
+                this.checkAllLoaded();
+                return;
+            }
+            
+            // 检查图片加载
+            images.forEach(img => {
+                if (img.complete) {
+                    loadedResources++;
                 } else {
-                    resolve();
-                }
-            }),
-            
-            // 等待Google字体加载
-            new Promise((resolve) => {
-                const googleFontLink = document.querySelector('link[href*="fonts.googleapis.com"]');
-                if (googleFontLink) {
-                    if (googleFontLink.sheet) {
-                        resolve(); // 如果已经加载完成
-                    } else {
-                        googleFontLink.onload = resolve;
-                    }
-                } else {
-                    resolve();
-                }
-            }),
-            
-            // 等待粒子画布初始化
-            new Promise((resolve) => setTimeout(resolve, 500)),
-            
-            // 等待CSS文件加载
-            new Promise((resolve) => {
-                const cssLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-                const cssLoaded = cssLinks.every(link => link.sheet);
-                
-                if (cssLoaded) {
-                    resolve();
-                } else {
-                    let loadedCount = 0;
-                    cssLinks.forEach(link => {
-                        if (link.sheet) {
-                            loadedCount++;
-                        } else {
-                            link.onload = () => {
-                                loadedCount++;
-                                if (loadedCount === cssLinks.length) resolve();
-                            };
+                    img.addEventListener('load', () => {
+                        loadedResources++;
+                        if (loadedResources >= totalResources) {
+                            this.resourcesLoaded = true;
+                            this.checkAllLoaded();
                         }
                     });
-                    
-                    // 如果所有CSS都已加载或没有CSS链接
-                    if (loadedCount === cssLinks.length) resolve();
+                    img.addEventListener('error', () => {
+                        loadedResources++;
+                        if (loadedResources >= totalResources) {
+                            this.resourcesLoaded = true;
+                            this.checkAllLoaded();
+                        }
+                    });
                 }
-            })
-        ]).then(() => {
-            // 清除超时定时器
-            clearTimeout(timeout);
+            });
             
-            // 所有资源加载完成后，隐藏加载界面
-            loader.classList.add('hidden');
+            // 检查粒子画布
+            if (canvas) {
+                const checkCanvas = setInterval(() => {
+                    if (canvas.width > 0 && canvas.height > 0) {
+                        clearInterval(checkCanvas);
+                        this.resourcesLoaded = true;
+                        this.checkAllLoaded();
+                    }
+                    
+                    // 如果超时还没准备好，也继续
+                    if (Date.now() - this.loadStartTime > this.maxLoadTime - 1000) {
+                        clearInterval(checkCanvas);
+                        this.resourcesLoaded = true;
+                        this.checkAllLoaded();
+                    }
+                }, 100);
+            }
             
-            // 初始化其他功能
-            ProgressBar.init();
-            Theme.init();
-            CardAnimation.init();
-            Hitokoto.init();
-            DigitalClock.init();
-            Particles.init();
-            Navigation.init();
-            ScrollSpy.init();
-            
-            // 移除加载界面（可选）
+            // 如果没有图片但有canvas
+            if (totalResources === 0 && canvas) {
+                // 已经在上面处理了canvas
+            } else if (loadedResources >= totalResources) {
+                this.resourcesLoaded = true;
+                this.checkAllLoaded();
+            }
+        },
+        
+        checkAllLoaded() {
+            if (this.fontsLoaded && this.resourcesLoaded) {
+                this.hideLoader();
+            }
+        },
+        
+        setTimeout() {
             setTimeout(() => {
-                loader.style.display = 'none';
+                this.hideLoader();
+            }, this.maxLoadTime);
+        },
+        
+        hideLoader() {
+            if (!this.loader || this.loader.style.opacity === '0') return;
+            
+            this.loader.style.opacity = '0';
+            this.loader.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                if (this.loader) {
+                    this.loader.style.display = 'none';
+                }
+                
+                // 触发自定义事件，通知其他模块可以开始动画
+                document.dispatchEvent(new CustomEvent('pageLoaded'));
             }, 500);
-        }).catch((error) => {
-            console.error('资源加载出错:', error);
-            clearTimeout(timeout);
-            forceShowPage();
+        }
+    };
+
+    // 初始化函数
+    document.addEventListener('DOMContentLoaded', () => {
+        // 首先初始化加载器
+        Loader.init();
+        
+        // 然后初始化其他功能
+        ProgressBar.init();
+        Theme.init();
+        CardAnimation.init();
+        Hitokoto.init();
+        DigitalClock.init();
+        Particles.init();
+        Navigation.init();
+        ScrollSpy.init();
+        
+        // 当页面完全加载后执行动画
+        document.addEventListener('pageLoaded', () => {
+            // 确保所有内容都已加载后再执行动画
+            const heroContent = document.querySelector('.hero-content');
+            if (heroContent) {
+                heroContent.style.opacity = '1';
+                heroContent.style.transform = 'translateY(0)';
+            }
+            
+            // 卡片动画
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
         });
     });
-    
+
     // 进度条模块
     const ProgressBar = {
         init() {
