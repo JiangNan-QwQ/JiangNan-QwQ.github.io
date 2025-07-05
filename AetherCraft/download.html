@@ -25,16 +25,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- 主样式 -->
-    <link rel="stylesheet" href="/AetherCraft/styles.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<!-- 加载界面 -->
+<div id="loading-screen">
+    <div class="loading-content">
+        <div class="loading-logo">
+            <i class="fas fa-cube"></i>
+            <span>Aether_Craft</span>
+        </div>
+        <div class="loading-progress">
+            <div class="progress-bar"></div>
+        </div>
+        <p class="loading-text">正在加载资源...</p>
+    </div>
+</div>
+
     <!-- 进度条 -->
     <div class="progress-bar"></div>
     
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">
+            <a href="/AetherCraft/index.html" class="logo">
                 <i class="fas fa-cube"></i>
                 <span>Aether_Craft</span>
             </a>
@@ -373,8 +387,8 @@ echo "更换成功"
             <div class="footer-column">
                 <h3>快速链接</h3>
                 <ul class="footer-links">
-                    <li><a href="index.html">首页</a></li>
-                    <li><a href="download.html">下载帮助</a></li>
+                    <li><a href="/AetherCraft/index.html">首页</a></li>
+                    <li><a href="/AetherCraft/download.html">下载帮助</a></li>
                     <li><a href="#mobile-install">手机安装</a></li>
                     <li><a href="#pc-install">电脑安装</a></li>
                 </ul>
@@ -391,7 +405,7 @@ echo "更换成功"
    
 
     <!-- 脚本 -->
-    <script src="/AetherCraft/js.js"></script>
+    <script src="js.js"></script>
     <!-- 代码高亮 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <!-- 剪贴板 -->

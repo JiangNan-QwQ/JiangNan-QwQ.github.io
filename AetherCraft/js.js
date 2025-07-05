@@ -1,167 +1,93 @@
 // 使用模块化方式组织代码
 (function() {
-    // 加载状态管理
-    const Loader = {
-        init() {
-            this.loader = document.querySelector('.loader');
-            this.maxLoadTime = 10000; // 10秒超时
-            this.loadStartTime = Date.now();
-            this.resourcesLoaded = false;
-            this.fontsLoaded = false;
-            
-            if (!this.loader) return;
-            
-            // 检查字体是否加载完成
-            this.checkFontsLoading();
-            // 检查图片和图标是否加载完成
-            this.checkResourcesLoading();
-            // 设置超时
-            this.setTimeout();
-        },
+// 加载控制模块
+const LoadingManager = {
+    init() {
+        this.loadingScreen = document.getElementById('loading-screen');
+        this.progressBar = document.querySelector('.loading-progress .progress-bar');
+        this.loadingText = document.querySelector('.loading-text');
         
-        checkFontsLoading() {
-            // 使用 FontFace API 检查字体加载状态
-            Promise.all([
-                document.fonts.load('1rem var(--font-sans)'),
-                document.fonts.load('1rem var(--font-mono)')
-            ]).then(() => {
-                this.fontsLoaded = true;
-                this.checkAllLoaded();
-            }).catch(() => {
-                // 即使字体加载失败也继续
-                this.fontsLoaded = true;
-                this.checkAllLoaded();
-            });
-        },
+        if (!this.loadingScreen) return;
         
-        checkResourcesLoading() {
-            // 检查所有图片、图标等资源
-            const images = document.querySelectorAll('img');
-            const icons = document.querySelectorAll('i');
-            const canvas = document.getElementById('particles');
+        // 设置10秒超时
+        this.timeout = setTimeout(() => {
+            this.loadingText.textContent = '加载超时，正在尝试显示内容...';
+            this.hideLoadingScreen();
+        }, 10000);
+        
+        // 监听所有资源加载
+        this.checkResources();
+    },
+    
+    checkResources() {
+        // 跟踪已加载资源数量
+        let loaded = 0;
+        const totalResources = document.querySelectorAll('link[rel="stylesheet"], script, img').length;
+        
+        // 更新进度条
+        const updateProgress = () => {
+            loaded++;
+            const progress = Math.min(loaded / totalResources * 100, 90); // 留10%给页面初始化
+            this.progressBar.style.width = `${progress}%`;
             
-            let totalResources = images.length;
-            let loadedResources = 0;
-            
-            // 如果没有图片资源，直接标记为加载完成
-            if (totalResources === 0 && !canvas) {
-                this.resourcesLoaded = true;
-                this.checkAllLoaded();
-                return;
+            if (loaded >= totalResources) {
+                this.onResourcesLoaded();
             }
-            
-            // 检查图片加载
-            images.forEach(img => {
-                if (img.complete) {
-                    loadedResources++;
-                } else {
-                    img.addEventListener('load', () => {
-                        loadedResources++;
-                        if (loadedResources >= totalResources) {
-                            this.resourcesLoaded = true;
-                            this.checkAllLoaded();
-                        }
-                    });
-                    img.addEventListener('error', () => {
-                        loadedResources++;
-                        if (loadedResources >= totalResources) {
-                            this.resourcesLoaded = true;
-                            this.checkAllLoaded();
-                        }
-                    });
-                }
-            });
-            
-            // 检查粒子画布
-            if (canvas) {
-                const checkCanvas = setInterval(() => {
-                    if (canvas.width > 0 && canvas.height > 0) {
-                        clearInterval(checkCanvas);
-                        this.resourcesLoaded = true;
-                        this.checkAllLoaded();
-                    }
-                    
-                    // 如果超时还没准备好，也继续
-                    if (Date.now() - this.loadStartTime > this.maxLoadTime - 1000) {
-                        clearInterval(checkCanvas);
-                        this.resourcesLoaded = true;
-                        this.checkAllLoaded();
-                    }
-                }, 100);
+        };
+        
+        // 检查样式表
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            if (link.sheet) {
+                updateProgress();
+            } else {
+                link.addEventListener('load', updateProgress);
+                link.addEventListener('error', updateProgress);
             }
-            
-            // 如果没有图片但有canvas
-            if (totalResources === 0 && canvas) {
-                // 已经在上面处理了canvas
-            } else if (loadedResources >= totalResources) {
-                this.resourcesLoaded = true;
-                this.checkAllLoaded();
-            }
-        },
-        
-        checkAllLoaded() {
-            if (this.fontsLoaded && this.resourcesLoaded) {
-                this.hideLoader();
-            }
-        },
-        
-        setTimeout() {
-            setTimeout(() => {
-                this.hideLoader();
-            }, this.maxLoadTime);
-        },
-        
-        hideLoader() {
-            if (!this.loader || this.loader.style.opacity === '0') return;
-            
-            this.loader.style.opacity = '0';
-            this.loader.style.pointerEvents = 'none';
-            
-            setTimeout(() => {
-                if (this.loader) {
-                    this.loader.style.display = 'none';
-                }
-                
-                // 触发自定义事件，通知其他模块可以开始动画
-                document.dispatchEvent(new CustomEvent('pageLoaded'));
-            }, 500);
-        }
-    };
-
-    // 初始化函数
-    document.addEventListener('DOMContentLoaded', () => {
-        // 首先初始化加载器
-        Loader.init();
-        
-        // 然后初始化其他功能
-        ProgressBar.init();
-        Theme.init();
-        CardAnimation.init();
-        Hitokoto.init();
-        DigitalClock.init();
-        Particles.init();
-        Navigation.init();
-        ScrollSpy.init();
-        
-        // 当页面完全加载后执行动画
-        document.addEventListener('pageLoaded', () => {
-            // 确保所有内容都已加载后再执行动画
-            const heroContent = document.querySelector('.hero-content');
-            if (heroContent) {
-                heroContent.style.opacity = '1';
-                heroContent.style.transform = 'translateY(0)';
-            }
-            
-            // 卡片动画
-            const cards = document.querySelectorAll('.card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
         });
-    });
+        
+        // 检查脚本
+        document.querySelectorAll('script').forEach(script => {
+            if (script.src && !script.async && !script.defer) {
+                script.addEventListener('load', updateProgress);
+                script.addEventListener('error', updateProgress);
+            } else {
+                updateProgress();
+            }
+        });
+        
+        // 检查图片
+        document.querySelectorAll('img').forEach(img => {
+            if (img.complete) {
+                updateProgress();
+            } else {
+                img.addEventListener('load', updateProgress);
+                img.addEventListener('error', updateProgress);
+            }
+        });
+    },
+    
+    onResourcesLoaded() {
+        // 等待DOM完全加载
+        if (document.readyState === 'complete') {
+            this.hideLoadingScreen();
+        } else {
+            window.addEventListener('load', () => this.hideLoadingScreen());
+        }
+    },
+    
+    hideLoadingScreen() {
+        clearTimeout(this.timeout);
+        if (this.loadingScreen) {
+            this.progressBar.style.width = '100%';
+            setTimeout(() => {
+                this.loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    this.loadingScreen.style.display = 'none';
+                }, 500);
+            }, 300);
+        }
+    }
+};
 
     // 进度条模块
     const ProgressBar = {
@@ -494,4 +420,35 @@
         
         return `${r}, ${g}, ${b}`;
     }
+
+    // 初始化函数
+    document.addEventListener('DOMContentLoaded', () => {
+        // 初始化所有功能模块
+        // 初始化加载管理器
+    LoadingManager.init();
+        ProgressBar.init();
+        Theme.init();
+        CardAnimation.init();
+        Hitokoto.init();
+        DigitalClock.init();
+        Particles.init();
+        Navigation.init();
+        ScrollSpy.init();
+   
+    
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent) {
+            heroContent.style.opacity = '1';
+            heroContent.style.transform = 'translateY(0)';
+        }
+        
+        // 卡片动画
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+    });
 })();
