@@ -105,61 +105,7 @@
                         <h3>2. 基本环境配置</h3>
                         <p>安装完成后，打开ZeroTermux并粘贴以下命令回车以更新系统(国内)：</p>
                         <div class="code-block" id="code-block-1">
-                            <pre><code class="language-bash">bash -c '
-# 定义所有可用的国内镜像组
-MIRRORS=(
-    "https://mirrors.hust.edu.cn/termux/apt/termux-main"
-    "https://mirrors.nju.edu.cn/termux/apt/termux-main"
-    "https://mirrors.cernet.edu.cn/termux/apt/termux-main"
-    "https://mirror.nyist.edu.cn/termux/apt/termux-main"
-    "https://mirrors.sau.edu.cn/termux/apt/termux-main"
-    "https://mirrors.cqupt.edu.cn/termux/termux-main"
-    "https://mirror.iscas.ac.cn/termux/apt/termux-main"
-    "https://mirrors.pku.edu.cn/termux/termux-main/"
-    "https://mirrors.tuna.tsinghua.edu.cn/termux/apt/termux-main"
-    "https://mirrors.bfsu.edu.cn/termux/apt/termux-main"
-    "https://mirrors.zju.edu.cn/termux/apt/termux-main"
-    "https://mirrors.sustech.edu.cn/termux/apt/termux-main"
-    "https://mirror.sjtu.edu.cn/termux/termux-main/"
-    "https://mirrors.aliyun.com/termux/termux-main"
-    "https://mirrors.ustc.edu.cn/termux/termux-main"
-)
-
-# 备份原来的sources.list文件
-if [ -f "$PREFIX/etc/apt/sources.list" ]; then
-    cp "$PREFIX/etc/apt/sources.list" "$PREFIX/etc/apt/sources.list.bak"
-fi
-
-# 生成新的sources.list文件
-echo "# Termux 国内镜像组配置" > "$PREFIX/etc/apt/sources.list"
-echo "# 生成时间: $(date)" >> "$PREFIX/etc/apt/sources.list"
-echo "" >> "$PREFIX/etc/apt/sources.list"
-
-# 添加主仓库(main)镜像
-echo "# 主仓库镜像" >> "$PREFIX/etc/apt/sources.list"
-for mirror in "${MIRRORS[@]}"; do
-    BASE_URL=${mirror%/*}
-    echo "deb ${BASE_URL}/ stable main" >> "$PREFIX/etc/apt/sources.list"
-done
-
-# 添加游戏仓库(games)镜像
-echo "" >> "$PREFIX/etc/apt/sources.list"
-echo "# 游戏仓库镜像" >> "$PREFIX/etc/apt/sources.list"
-for mirror in "${MIRRORS[@]}"; do
-    BASE_URL=${mirror%/*}
-    echo "deb ${BASE_URL}/ games stable" >> "$PREFIX/etc/apt/sources.list"
-done
-
-echo "Termux 软件源已成功更换为国内镜像组，包含以下镜像:"
-for mirror in "${MIRRORS[@]}"; do
-    BASE_URL=${mirror%/*}
-    echo "  - ${BASE_URL}"
-done
-echo ""
-pkg up
-echo "更换成功"
-'
-</code></pre>
+                            <pre><code class="language-bash">termux-change-repo</code></pre>
                             <button class="copy-btn" data-clipboard-target="#code-block-1 code"><i class="fas fa-copy"></i> 复制</button>
                         </div>
                     </div>
@@ -168,7 +114,7 @@ echo "更换成功"
                 
                 <div class="guide-step">
                     <div class="step-content">
-                        <h3>3. 运行Aether_Craft脚本#由于新版本正在开发中，国内版本暂不可用</h3>
+                        <h3>3. 运行Aether_Craft脚本#由于新版本正在开发中，国外版本暂不可用</h3>
                         <p>使用curl执行：</p>
                         <div class="tabs">
                             <div class="tab-buttons">
